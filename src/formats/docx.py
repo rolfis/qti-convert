@@ -43,13 +43,12 @@ def setup_a4(document):
     section = document.sections[0]
     section.page_height = Mm(297)
     section.page_width = Mm(210)
-    section.left_margin = Mm(25.4)
-    section.right_margin = Mm(25.4)
-    section.top_margin = Mm(25.4)
-    section.bottom_margin = Mm(25.4)
-    section.header_distance = Mm(12.7)
-    section.footer_distance = Mm(12.7)
-
+    section.left_margin = Mm(20)
+    section.right_margin = Mm(30)
+    section.top_margin = Mm(20)
+    section.bottom_margin = Mm(20)
+    section.header_distance = Mm(12)
+    section.footer_distance = Mm(12)
     return document
 
 def setup_metadata(document):
