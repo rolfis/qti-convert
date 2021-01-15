@@ -19,7 +19,8 @@ def get_answers(xml):
                 {
                     'id': xml_answer_item.get("ident"),
                     'text': xml_answer_item.find("{http://www.imsglobal.org/xsd/ims_qtiasiv1p2}material/{http://www.imsglobal.org/xsd/ims_qtiasiv1p2}mattext").text,
-                    'correct': True if xml_answer_item.get("ident") in correct_answers else False
+                    'correct': True if xml_answer_item.get("ident") in correct_answers else False,
+                    'display': True
                 }
             )
     except OSError as e:

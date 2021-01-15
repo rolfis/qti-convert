@@ -17,7 +17,8 @@ def get_answers(xml):
                 {
                     'id': str(i),
                     'text': xml_answer_item.text,
-                    'correct': True
+                    'correct': True,
+                    'display': False
                 }
             )
     except OSError as e:

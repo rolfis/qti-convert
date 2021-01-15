@@ -6,6 +6,8 @@ name = "pypi"
 [packages]
 logzero = "*"
 lxml = "*"
+python-docx = "*"
+htmldocx = "*"
 
 [dev-packages]
 

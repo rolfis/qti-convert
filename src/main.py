@@ -4,12 +4,15 @@ QTI to other formats converter
 """
 
 __author__ = "Rolf Johansson"
+__license__ = "Apache License 2.0"
 __version__ = "0.1.0"
-__license__ = "Apache"
 
 from qti_parser import question_type
+import formats
 import argparse
 import json
+import re
+import hashlib
 from logzero import logger
 from lxml import etree
 
@@ -18,7 +21,6 @@ qti_resource = {
 } 
 
 def main(args):
-    """ Main entry point of the app """
     logger.info("QTI converter utility.")
     logger.info(args)
 
@@ -31,6 +33,8 @@ def main(args):
                 'title': '', 
                 'question': []
             }
+
+            # TODO: Should be prefixed with PATH part of input filename since paths in XML are relative
             this_assessment_xml = this_assessment['id'] + "/" + this_assessment['id'] + ".xml"
 
             for xml_item in etree.parse(this_assessment_xml).getroot().findall(".//{http://www.imsglobal.org/xsd/ims_qtiasiv1p2}item"):
@@ -41,6 +45,35 @@ def main(args):
                     'points_possible': xml_item_metadata.find("{http://www.imsglobal.org/xsd/ims_qtiasiv1p2}qtimetadatafield[{http://www.imsglobal.org/xsd/ims_qtiasiv1p2}fieldlabel = 'points_possible']/{http://www.imsglobal.org/xsd/ims_qtiasiv1p2}fieldentry").text,
                     'text': xml_item.find("{http://www.imsglobal.org/xsd/ims_qtiasiv1p2}presentation/{http://www.imsglobal.org/xsd/ims_qtiasiv1p2}material/{http://www.imsglobal.org/xsd/ims_qtiasiv1p2}mattext").text
                 }
+
+                # TODO: Fix images in a better way
+                image = []
+                if this_question['text'].lower().find("<p>.*<img"):
+                    for match in re.finditer('<p>.*<img src=\"([^\"]+)\".*>.*</p>', this_question['text'], re.DOTALL):
+                        image.append({
+                            'id': str(hashlib.md5(match.group(1).replace("%24IMS-CC-FILEBASE%24/", "").encode()).hexdigest()),
+                            'href': match.group(1).replace("%24IMS-CC-FILEBASE%24/", "")
+                        })
+                    p = re.compile('<p>.*<img src=\"([^\"]+)\".*>.*</p>')
+                    subn_tuple = p.subn('', this_question['text'])
+                    if subn_tuple[1] > 0:
+                        this_question['text'] = subn_tuple[0]
+
+                elif this_question['text'].lower().find("<img"):
+                    for match in re.finditer('<img src=\"([^\"]+)\".*>', this_question['text'], re.DOTALL):
+                        image.append({
+                            'id': str(hashlib.md5(match.group(1).replace("%24IMS-CC-FILEBASE%24/", "").encode()).hexdigest()),
+                            'href': match.group(1).replace("%24IMS-CC-FILEBASE%24/", "")
+                        })
+                    p = re.compile('<img src=\"([^\"]+)\".*>')
+                    subn_tuple = p.subn('', this_question['text'])
+                    if subn_tuple[1] > 0:
+                        this_question['text'] = subn_tuple[0]
+
+                if image:
+                    this_question['image'] = image
+
+                # <p><img src="Exercise_09_05-06_03a.png" alt="Exercise_09_05-06_03a.png" width="393" height="126"></p>
 
                 if this_question['question_type'] == "multiple_choice_question":
                     this_question['answer'] = question_type.multiple_choice.get_answers(xml_item)
@@ -56,8 +89,16 @@ def main(args):
 
             qti_resource['assessment'].append(this_assessment)
 
-        qti_resource_json = json.dumps(qti_resource, indent = 2)
-        print(qti_resource_json)
+        if (args.format.lower() == "json"):
+            logger.info("Output to STDOUT as JSON.")
+            qti_resource_json = json.dumps(qti_resource, indent = 2)
+            print(qti_resource_json)
+        elif (args.format.lower() == "pdf"):
+            logger.error("Format not supported yet: " + args.format)
+        elif (args.format.lower() == "docx"):
+            formats.docx.write_file(qti_resource)
+        else:
+            logger.error("Unknown format: " + args.format)
 
     except OSError as e:
         logger.error("%s", e)
@@ -68,11 +109,10 @@ def main(args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Convert QTI files into other formats.", add_help=False)
-    parser.add_argument("input", help="QTI input file.")
+    parser.add_argument("input", help="QTI input file (imsmanifest.xml).")
     parser.add_argument("-v", action="count", default=0, help="Verbosity (-v, -vv, etc).")
     parser.add_argument("-f", action="store", dest="format", default="json", help="Output format, defaults to JSON.")
     parser.add_argument( "--version", action="version", help="Display version and exit.", version="%(prog)s (version {version})".format(version=__version__))
     parser.add_argument('-h', '--help', action='help', default=argparse.SUPPRESS, help='Show this help message and exit.')
     args = parser.parse_args()
-    print(args)
     main(args)
