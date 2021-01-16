@@ -1,5 +1,6 @@
 """
 Multiple Choice
+Select one answer from a list of answers
 """
 
 from lxml import etree
@@ -12,8 +13,7 @@ def get_answers(xml):
     answers = []
     correct_answers = []
 
-    # Correct answer is wrapped in <respcondition continue="No"></>?
-    for id in xml.findall(".//{http://www.imsglobal.org/xsd/ims_qtiasiv1p2}varequal"):
+    for id in xml.findall(".//{http://www.imsglobal.org/xsd/ims_qtiasiv1p2}respcondition[@continue='No']/{http://www.imsglobal.org/xsd/ims_qtiasiv1p2}conditionvar/{http://www.imsglobal.org/xsd/ims_qtiasiv1p2}varequal"):
         correct_answers.append(id.text)
 
     try:
