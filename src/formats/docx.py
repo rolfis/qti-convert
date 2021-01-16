@@ -8,7 +8,7 @@ from docx.enum.text import WD_BREAK
 from htmldocx import HtmlToDocx
 from logzero import logger
 
-def write_file(data):
+def write_file(data, outfile):
     doc = Document()
     doc = setup_a4(doc)
     doc = setup_metadata(doc)
@@ -37,7 +37,7 @@ def write_file(data):
 
             doc.add_page_break()
 
-    doc.save("output.docx")
+    doc.save(outfile)
 
 def setup_a4(document):
     section = document.sections[0]

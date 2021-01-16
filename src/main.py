@@ -48,11 +48,13 @@ def main(args):
 
                 image = []
 
+                # Try and find images in text
                 if this_question['text'].lower().find("<p>.*<img"):
                     for match in re.finditer('<p>.*<img src=\"([^\"]+)\".*>.*</p>', this_question['text'], re.DOTALL):
+                        this_href = re.sub("\?.+$", "", match.group(1)).replace("%24IMS-CC-FILEBASE%24/", "")
                         image.append({
-                            'id': str(hashlib.md5(match.group(1).replace("%24IMS-CC-FILEBASE%24/", "").encode()).hexdigest()),
-                            'href': match.group(1).replace("%24IMS-CC-FILEBASE%24/", "")
+                            'id': str(hashlib.md5(this_href.encode()).hexdigest()),
+                            'href': this_href
                         })
                     p = re.compile('<p>.*<img src=\"([^\"]+)\".*>.*</p>')
                     subn_tuple = p.subn('', this_question['text'])
@@ -61,9 +63,10 @@ def main(args):
 
                 elif this_question['text'].lower().find("<img"):
                     for match in re.finditer('<img src=\"([^\"]+)\".*>', this_question['text'], re.DOTALL):
+                        this_href = re.sub("\?.+$", "", match.group(1)).replace("%24IMS-CC-FILEBASE%24/", "")
                         image.append({
-                            'id': str(hashlib.md5(match.group(1).replace("%24IMS-CC-FILEBASE%24/", "").encode()).hexdigest()),
-                            'href': match.group(1).replace("%24IMS-CC-FILEBASE%24/", "")
+                            'id': str(hashlib.md5(this_href.encode()).hexdigest()),
+                            'href': this_href
                         })
                     p = re.compile('<img src=\"([^\"]+)\".*>')
                     subn_tuple = p.subn('', this_question['text'])
@@ -95,14 +98,27 @@ def main(args):
 
             qti_resource['assessment'].append(this_assessment)
 
-        if (args.format.lower() == "json"):
-            logger.info("Output to STDOUT as JSON.")
-            qti_resource_json = json.dumps(qti_resource, indent = 2)
-            print(qti_resource_json)
-        elif (args.format.lower() == "pdf"):
+        if args.format.lower() == "json":
+            if args.output:
+                logger.info("Writing JSON to '" + args.output + "'...")
+                with open(args.output, 'w') as outfile:
+                    json.dump(qti_resource, outfile)
+            else:
+                logger.info("Writing JSON to STDOUT...")
+                qti_resource_json = json.dumps(qti_resource, indent = 2)
+                print(qti_resource_json)
+
+        elif args.format.lower() == "docx":
+            if args.output:
+                outfile = args.output
+            else:
+                outfile = "output.docx"
+            logger.info("Writing DOCX to '" + outfile + "'...")
+            formats.docx.write_file(qti_resource, outfile)
+
+        elif args.format.lower() == "pdf":
             logger.error("Format not supported yet: " + args.format)
-        elif (args.format.lower() == "docx"):
-            formats.docx.write_file(qti_resource)
+
         else:
             logger.error("Unknown format: " + args.format)
 
@@ -118,6 +134,7 @@ if __name__ == "__main__":
     parser.add_argument("input", help="QTI input file (imsmanifest.xml).")
     parser.add_argument("-v", action="count", default=0, help="Verbosity (-v, -vv, etc).")
     parser.add_argument("-f", action="store", dest="format", default="json", help="Output format, defaults to JSON.")
+    parser.add_argument("-o", action="store", dest="output", help="Output file.")
     parser.add_argument( "--version", action="version", help="Display version and exit.", version="%(prog)s (version {version})".format(version=__version__))
     parser.add_argument('-h', '--help', action='help', default=argparse.SUPPRESS, help='Show this help message and exit.')
     args = parser.parse_args()
