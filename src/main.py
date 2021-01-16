@@ -46,8 +46,8 @@ def main(args):
                     'text': xml_item.find("{http://www.imsglobal.org/xsd/ims_qtiasiv1p2}presentation/{http://www.imsglobal.org/xsd/ims_qtiasiv1p2}material/{http://www.imsglobal.org/xsd/ims_qtiasiv1p2}mattext").text
                 }
 
-                # TODO: Fix images in a better way
                 image = []
+
                 if this_question['text'].lower().find("<p>.*<img"):
                     for match in re.finditer('<p>.*<img src=\"([^\"]+)\".*>.*</p>', this_question['text'], re.DOTALL):
                         image.append({
@@ -73,8 +73,6 @@ def main(args):
                 if image:
                     this_question['image'] = image
 
-                # <p><img src="Exercise_09_05-06_03a.png" alt="Exercise_09_05-06_03a.png" width="393" height="126"></p>
-
                 if this_question['question_type'] == "multiple_choice_question":
                     this_question['answer'] = question_type.multiple_choice.get_answers(xml_item)
                 elif this_question['question_type'] == "true_false_question":
@@ -83,6 +81,14 @@ def main(args):
                     this_question['answer'] = question_type.multiple_answers.get_answers(xml_item)
                 elif this_question['question_type'] == "short_answer_question":
                     this_question['answer'] = question_type.short_answer.get_answers(xml_item)
+                elif this_question['question_type'] == "fill_in_multiple_blanks_question":
+                    this_question['answer'] = question_type.fill_in_multiple_blanks.get_answers(xml_item)
+
+                if (this_question['question_type'] == "fill_in_multiple_blanks_question" or this_question['question_type'] == "multiple_dropdowns_question") and this_question['text'].find("\[(.*?)\]"):
+                    p = re.compile("\[(.*?)\]")
+                    subn_tuple = p.subn("_" * 10, this_question['text'])
+                    if subn_tuple[1] > 0:
+                        this_question['text'] = subn_tuple[0]
 
                 this_assessment['question'].append(this_question)
                 this_assessment['title'] = etree.parse(this_assessment_xml).getroot().find("{http://www.imsglobal.org/xsd/ims_qtiasiv1p2}assessment").get("title")
