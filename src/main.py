@@ -3,7 +3,6 @@
 QTI to other formats converter
 """
 
-import formats
 import argparse
 import json
 import re
@@ -11,7 +10,9 @@ import hashlib
 from logzero import logger
 from lxml import etree
 from qti_parser import question_type
+from qti_parser import assessment_meta
 import config
+import formats
 
 __author__ = config.__author__
 __description__ = config.__description__
@@ -31,11 +32,11 @@ def main(args):
 
         for xml_resource in xml_doc.getroot().findall(".//{http://www.imsglobal.org/xsd/imsccv1p1/imscp_v1p1}resource[@type='imsqti_xmlv1p2']"):
             this_assessment = {
-                'id': xml_resource.get("identifier"), 
-                'title': '', 
+                'id': xml_resource.get("identifier"),
+                'metadata': assessment_meta.get_metadata(xml_resource.get("identifier") + "/" + "assessment_meta.xml"),
                 'question': []
             }
-
+            
             # TODO: Should be prefixed with PATH part of input filename since paths in XML are relative
             this_assessment_xml = this_assessment['id'] + "/" + this_assessment['id'] + ".xml"
 
@@ -96,7 +97,6 @@ def main(args):
                         this_question['text'] = subn_tuple[0]
 
                 this_assessment['question'].append(this_question)
-                this_assessment['title'] = etree.parse(this_assessment_xml).getroot().find("{http://www.imsglobal.org/xsd/ims_qtiasiv1p2}assessment").get("title")
 
             qti_resource['assessment'].append(this_assessment)
 
