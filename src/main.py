@@ -91,7 +91,7 @@ def main(args):
 
                 if (this_question['question_type'] == "fill_in_multiple_blanks_question" or this_question['question_type'] == "multiple_dropdowns_question") and this_question['text'].find("\[(.*?)\]"):
                     p = re.compile("\[(.*?)\]")
-                    subn_tuple = p.subn(config.blanks_replace * config.blanks_replace_n, this_question['text'])
+                    subn_tuple = p.subn(config.blanks_replace_str * config.blanks_question_n, this_question['text'])
                     if subn_tuple[1] > 0:
                         this_question['text'] = subn_tuple[0]
 

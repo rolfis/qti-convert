@@ -8,6 +8,7 @@ from docx.enum.text import WD_BREAK
 from htmldocx import HtmlToDocx
 from logzero import logger
 import re
+import config
 
 def write_file(data, outfile):
     doc = Document()
@@ -35,7 +36,7 @@ def write_file(data, outfile):
                         if 'text' in answer and answer['text'] != None:
                             html_parser.add_html_to_document("<p>" + str(index+1) + ". </p>" + answer['text'], doc)
                     else:
-                        doc.add_paragraph("_" * 80)
+                        doc.add_paragraph(config.blanks_replace_str * config.blanks_answer_n)
 
             doc.add_page_break()
 
