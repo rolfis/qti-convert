@@ -3,11 +3,6 @@
 QTI to other formats converter
 """
 
-__author__ = "Rolf Johansson"
-__license__ = "Apache License 2.0"
-__version__ = "0.1.0"
-
-from qti_parser import question_type
 import formats
 import argparse
 import json
@@ -15,17 +10,24 @@ import re
 import hashlib
 from logzero import logger
 from lxml import etree
+from qti_parser import question_type
+import config
 
-qti_resource = {
-    'assessment': []
-} 
+__author__ = config.__author__
+__description__ = config.__description__
+__license__ = config.__license__
+__version__ = config.__version__
 
 def main(args):
-    logger.info("QTI converter utility.")
+    logger.info(__description__)
     logger.info(args)
 
     try:
         xml_doc = etree.parse(args.input)
+
+        qti_resource = {
+            'assessment': []
+        } 
 
         for xml_resource in xml_doc.getroot().findall(".//{http://www.imsglobal.org/xsd/imsccv1p1/imscp_v1p1}resource[@type='imsqti_xmlv1p2']"):
             this_assessment = {
@@ -51,7 +53,7 @@ def main(args):
                 # Try and find images in text
                 if this_question['text'].lower().find("<p>.*<img"):
                     for match in re.finditer('<p>.*<img src=\"([^\"]+)\".*>.*</p>', this_question['text'], re.DOTALL):
-                        this_href = re.sub("\?.+$", "", match.group(1)).replace("%24IMS-CC-FILEBASE%24/", "")
+                        this_href = re.sub("\?.+$", "", match.group(1)).replace(config.img_href_ims_base, "")
                         image.append({
                             'id': str(hashlib.md5(this_href.encode()).hexdigest()),
                             'href': this_href
@@ -63,7 +65,7 @@ def main(args):
 
                 elif this_question['text'].lower().find("<img"):
                     for match in re.finditer('<img src=\"([^\"]+)\".*>', this_question['text'], re.DOTALL):
-                        this_href = re.sub("\?.+$", "", match.group(1)).replace("%24IMS-CC-FILEBASE%24/", "")
+                        this_href = re.sub("\?.+$", "", match.group(1)).replace(config.img_href_ims_base, "")
                         image.append({
                             'id': str(hashlib.md5(this_href.encode()).hexdigest()),
                             'href': this_href
@@ -89,7 +91,7 @@ def main(args):
 
                 if (this_question['question_type'] == "fill_in_multiple_blanks_question" or this_question['question_type'] == "multiple_dropdowns_question") and this_question['text'].find("\[(.*?)\]"):
                     p = re.compile("\[(.*?)\]")
-                    subn_tuple = p.subn("_" * 10, this_question['text'])
+                    subn_tuple = p.subn(config.blanks_replace * config.blanks_replace_n, this_question['text'])
                     if subn_tuple[1] > 0:
                         this_question['text'] = subn_tuple[0]
 

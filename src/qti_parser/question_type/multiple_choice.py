@@ -7,6 +7,7 @@ from lxml import etree
 from logzero import logger
 import re
 import hashlib
+import config
 
 def get_answers(xml):
     """ Return an array of possible answers """
@@ -28,8 +29,8 @@ def get_answers(xml):
             if this_answer['text'].lower().find("<img.*"):
                 for match in re.finditer('^<img src="([^"]+)".*>', this_answer['text'], re.DOTALL):
                     image.append({
-                        'id': str(hashlib.md5(match.group(1).replace("%24IMS-CC-FILEBASE%24/", "").encode()).hexdigest()),
-                        'href': match.group(1).replace("%24IMS-CC-FILEBASE%24/", "")
+                        'id': str(hashlib.md5(match.group(1).replace(config.img_href_ims_base, "").encode()).hexdigest()),
+                        'href': match.group(1).replace(config.img_href_ims_base, "")
                     })
                 p = re.compile('<img src="([^"]+)".*>')
                 subn_tuple = p.subn('', this_answer['text'])
