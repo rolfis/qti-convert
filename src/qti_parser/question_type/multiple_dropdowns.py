@@ -39,3 +39,18 @@ def get_answers(xml):
     except etree.ParseError as e:
         logger.error("XML parser error: %s", e)
     return answers_group
+
+def enumerate_blanks(text):
+    """ Clarify blanks with index in question text """
+    start = 0
+    counter = 1
+    newstring = ""
+    blank = config.blanks_replace_str * config.blanks_question_n
+    for m in re.finditer(r"(" + blank + ")", text):
+        end, newstart = m.span()
+        newstring += text[start:end]
+        rep = m.group(1).upper() + " <sup>" + str(counter) + "</sup>"
+        newstring += rep
+        start = newstart
+        counter += 1
+    return newstring

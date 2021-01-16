@@ -95,11 +95,14 @@ def main(args):
 
                 # Replace [variable] in question text with blanks
                 if (this_question['question_type'] == "fill_in_multiple_blanks_question" or this_question['question_type'] == "multiple_dropdowns_question") and this_question['text'].find(r"\[(.*?)\]"):
+                    blank = config.blanks_replace_str * config.blanks_question_n
                     p = re.compile(r"\[(.*?)\]")
-                    subn_tuple = p.subn(config.blanks_replace_str * config.blanks_question_n, this_question['text'])
+                    subn_tuple = p.subn(blank, this_question['text'])
                     if subn_tuple[1] > 0:
                         this_question['text'] = subn_tuple[0]
-
+                    if this_question['question_type'] == "multiple_dropdowns_question":
+                        this_question['text'] = question_type.multiple_dropdowns.enumerate_blanks(this_question['text'])
+                        
                 this_assessment['question'].append(this_question)
 
             qti_resource['assessment'].append(this_assessment)
