@@ -18,7 +18,9 @@ def write_file(data, outfile):
     html_parser = HtmlToDocx()
 
     for assessment in data['assessment']:
-        doc.add_heading(assessment['title'], 0)
+        doc.add_heading(assessment['metadata']['title'], 0)
+        html_parser.add_html_to_document(assessment['metadata']['description'], doc)
+
         for question in assessment['question']:
             if 'image' in question:
                 for img in question['image']:
@@ -26,17 +28,28 @@ def write_file(data, outfile):
             if 'text' in question and question['text'] != None:
                 this_question_text = re.sub('</*tbody>', '', question['text']) # See https://github.com/pqzx/html2docx/issues/1
                 html_parser.add_html_to_document(this_question_text, doc)
-            if 'answer' in question:                
-                for index, answer in enumerate(question['answer']):
-                    if answer['display']:
-                        if 'image' in answer:
-                            for img in answer['image']:
-                                html_parser.add_html_to_document("<p>" + str(index+1) + ".</p>", doc)
-                                doc.add_picture(img['href'].replace("%20", " "), height=Mm(10))
-                        if 'text' in answer and answer['text'] != None:
-                            html_parser.add_html_to_document("<p>" + str(index+1) + ". </p>" + answer['text'], doc)
-                    else:
-                        doc.add_paragraph(config.blanks_replace_str * config.blanks_answer_n)
+            if 'answer' in question:
+                if question['question_type'] == "multiple_dropdowns_question":
+                    for aindex, group in enumerate(question['answer']):
+                        options = []
+                        for option in group['options']:
+                            if option['display']:
+                                if 'text' in answer and option['text'] != None:
+                                    options.append(option['text'])
+                                else:
+                                    options.append("---")
+                        doc.add_paragraph(str(aindex+1) + ": " + ", ".join(map(str, options)))
+                else:
+                    for index, answer in enumerate(question['answer']):
+                        if answer['display']:
+                            if 'image' in answer:
+                                for img in answer['image']:
+                                    html_parser.add_html_to_document("<p>" + str(index+1) + ".</p>", doc)
+                                    doc.add_picture(img['href'].replace("%20", " "), height=Mm(10))
+                            if 'text' in answer and answer['text'] != None:
+                                html_parser.add_html_to_document("<p>" + str(index+1) + ". </p>" + answer['text'], doc)
+                        else:
+                            doc.add_paragraph(config.blanks_replace_str * config.blanks_answer_n)
 
             doc.add_page_break()
 

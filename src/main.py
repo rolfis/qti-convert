@@ -36,10 +36,11 @@ def main(args):
                 'metadata': assessment_meta.get_metadata(xml_resource.get("identifier") + "/" + "assessment_meta.xml"),
                 'question': []
             }
-            
+
             # TODO: Should be prefixed with PATH part of input filename since paths in XML are relative
             this_assessment_xml = this_assessment['id'] + "/" + this_assessment['id'] + ".xml"
 
+            # Move this code block to qti_parser/item to follow coding/module style
             for xml_item in etree.parse(this_assessment_xml).getroot().findall(".//{http://www.imsglobal.org/xsd/ims_qtiasiv1p2}item"):
                 xml_item_metadata = xml_item.find("{http://www.imsglobal.org/xsd/ims_qtiasiv1p2}itemmetadata/{http://www.imsglobal.org/xsd/ims_qtiasiv1p2}qtimetadata")
                 this_question = {
@@ -89,9 +90,12 @@ def main(args):
                     this_question['answer'] = question_type.short_answer.get_answers(xml_item)
                 elif this_question['question_type'] == "fill_in_multiple_blanks_question":
                     this_question['answer'] = question_type.fill_in_multiple_blanks.get_answers(xml_item)
+                elif this_question['question_type'] == "multiple_dropdowns_question":
+                    this_question['answer'] = question_type.multiple_dropdowns.get_answers(xml_item)
 
-                if (this_question['question_type'] == "fill_in_multiple_blanks_question" or this_question['question_type'] == "multiple_dropdowns_question") and this_question['text'].find("\[(.*?)\]"):
-                    p = re.compile("\[(.*?)\]")
+                # Replace [variable] in question text with blanks
+                if (this_question['question_type'] == "fill_in_multiple_blanks_question" or this_question['question_type'] == "multiple_dropdowns_question") and this_question['text'].find(r"\[(.*?)\]"):
+                    p = re.compile(r"\[(.*?)\]")
                     subn_tuple = p.subn(config.blanks_replace_str * config.blanks_question_n, this_question['text'])
                     if subn_tuple[1] > 0:
                         this_question['text'] = subn_tuple[0]
