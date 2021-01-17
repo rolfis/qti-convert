@@ -61,6 +61,8 @@ def get_question(xml_item):
         this_question['answer'] = question_type.fill_in_multiple_blanks.get_answers(xml_item)
     elif this_question['question_type'] == "multiple_dropdowns_question":
         this_question['answer'] = question_type.multiple_dropdowns.get_answers(xml_item)
+    elif this_question['question_type'] == "matching_question":
+        this_question['answer'] = question_type.matching.get_answers(xml_item)
 
     # Replace [variable] in question text with blanks
     if (this_question['question_type'] == "fill_in_multiple_blanks_question" or this_question['question_type'] == "multiple_dropdowns_question") and this_question['text'].find(r"\[(.*?)\]"):

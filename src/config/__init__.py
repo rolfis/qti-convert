@@ -15,3 +15,7 @@ blanks_question_n = 10
 
 # Number of characters in answer line template
 blanks_answer_n = 80
+
+# Random shuffle of answers in type "Matching Question"
+matching_random_shuffle_answers = True
+matching_random_shuffle_answer_options = True

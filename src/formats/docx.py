@@ -41,6 +41,24 @@ def write_file(data, outfile):
                                 else:
                                     options.append("---")
                         doc.add_paragraph(str(aindex+1) + ": " + ", ".join(map(str, options)))
+                elif question['question_type'] == "matching_question":
+                    table = doc.add_table(rows=1, cols=2)
+                    for index, answer in enumerate(question['answer']):
+                        cell_0 = table.cell(0, 0)
+                        if 'image' in answer:
+                            for img in answer['image']:
+                                cell_0.add_picture(img['href'].replace("%20", " "), height=Mm(10))
+                        if 'text' in answer and answer['text'] != None:
+                            cell_0.text = cell_0.text + ("\n" if cell_0.text != "" else "") + answer['text']
+                        if index == 0:
+                            cell_1 = table.cell(0, 1)
+                            for option in answer['options']:
+                                if 'image' in option:
+                                    for img in option['image']:
+                                        cell_1.add_picture(img['href'].replace("%20", " "), height=Mm(10))
+                                if 'text' in option and option['text'] != None:
+                                    cell_1.text = cell_1.text + ("\n" if cell_1.text != "" else "") + option['text']
+                                    logger.debug(option['text'])
                 else:
                     for index, answer in enumerate(question['answer']):
                         if answer['display']:
