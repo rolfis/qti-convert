@@ -22,6 +22,8 @@ def write_file(data, outfile):
         html_parser.add_html_to_document(assessment['metadata']['description'], doc)
 
         for question in assessment['question']:
+            if 'title' in question:
+                doc.add_heading(question['title'], 1)
             if 'image' in question:
                 for img in question['image']:
                     doc.add_picture(img['href'].replace("%20", " "), width=Mm(100))
