@@ -13,15 +13,15 @@ Note: This code has only been tested with Canvas export packages. They need to b
 
     main.py imsmanifest.xml
 
-Converts the quizes and questions in the XML file to JSON on STDOUT.
+Converts the quizes and questions to JSON on STDOUT.
 
 
     main.py -o quiz.json imsmanifest.xml
 
-Converts the quizes and questions in the XML file to JSON and writes output to file `quiz.json`.
+Converts the quizes and questions to JSON and writes output to file `quiz.json`.
 
 
     main.py -f docx imsmanifest.xml
 
-Converts the quizes and questions in the XML file to Microsoft Word 2007 format (docx) and outputs to file `output.docx`.
+Converts the quizes and questions to Microsoft Word 2007 format (docx) and outputs to file `output.docx`.
 
