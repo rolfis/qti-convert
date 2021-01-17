@@ -58,7 +58,6 @@ def write_file(data, outfile):
                                         cell_1.add_picture(img['href'].replace("%20", " "), height=Mm(10))
                                 if 'text' in option and option['text'] != None:
                                     cell_1.text = cell_1.text + ("\n" if cell_1.text != "" else "") + option['text']
-                                    logger.debug(option['text'])
                 else:
                     for index, answer in enumerate(question['answer']):
                         if answer['display']:
