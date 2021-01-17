@@ -20,7 +20,6 @@ __version__ = config.__version__
 
 def main(args):
     logger.info(__description__)
-    logger.info(args)
 
     try:
         xml_doc = etree.parse(args.input)
