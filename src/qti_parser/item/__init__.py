@@ -22,25 +22,25 @@ def get_question(xml_item):
 
     # Try and find images in text to separate them
     if this_question['text'].lower().find("<p>.*<img"):
-        for match in re.finditer('<p>.*<img src=\"([^\"]+)\".*>.*</p>', this_question['text'], re.DOTALL):
+        for match in re.finditer('<p>.*<img.+src=\"([^\"]+)\".*>.*</p>', this_question['text'], re.DOTALL):
             this_href = re.sub(r"\?.+$", "", match.group(1)).replace(config.img_href_ims_base, "")
             image.append({
                 'id': str(hashlib.md5(this_href.encode()).hexdigest()),
                 'href': this_href
             })
-        p = re.compile('<p>.*<img src=\"([^\"]+)\".*>.*</p>')
+        p = re.compile('<p>.*<img.+src=\"([^\"]+)\".*>.*</p>')
         subn_tuple = p.subn('', this_question['text'])
         if subn_tuple[1] > 0:
             this_question['text'] = subn_tuple[0]
 
     elif this_question['text'].lower().find("<img"):
-        for match in re.finditer('<img src=\"([^\"]+)\".*>', this_question['text'], re.DOTALL):
+        for match in re.finditer('<img.+src=\"([^\"]+)\".*>', this_question['text'], re.DOTALL):
             this_href = re.sub(r"\?.+$", "", match.group(1)).replace(config.img_href_ims_base, "")
             image.append({
                 'id': str(hashlib.md5(this_href.encode()).hexdigest()),
                 'href': this_href
             })
-        p = re.compile('<img src=\"([^\"]+)\".*>')
+        p = re.compile('<img.+src=\"([^\"]+)\".*>')
         subn_tuple = p.subn('', this_question['text'])
         if subn_tuple[1] > 0:
             this_question['text'] = subn_tuple[0]
@@ -65,6 +65,8 @@ def get_question(xml_item):
         this_question['answer'] = question_type.matching.get_answers(xml_item)
     elif this_question['question_type'] == "numerical_question":
         this_question['answer'] = question_type.numerical.get_answers(xml_item)
+    elif this_question['question_type'] == "calculated_question":
+        this_question['answer'] = question_type.calculated.get_answers(xml_item)
 
     # Replace [variable] in question text with blanks
     if (this_question['question_type'] == "fill_in_multiple_blanks_question" or this_question['question_type'] == "multiple_dropdowns_question") and this_question['text'].find(r"\[(.*?)\]"):
@@ -75,5 +77,9 @@ def get_question(xml_item):
             this_question['text'] = subn_tuple[0]
         if this_question['question_type'] == "multiple_dropdowns_question":
             this_question['text'] = question_type.multiple_dropdowns.enumerate_blanks(this_question['text'])
+
+    if this_question['question_type'] == "calculated_question":
+        if config.calculated_display_var_set_in_text:
+            this_question['text'] = question_type.calculated.substitute_variables_in_question(this_question['text'], this_question['answer'][0])
 
     return this_question

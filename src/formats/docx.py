@@ -58,9 +58,16 @@ def write_file(data, outfile):
                                         cell_1.add_picture(img['href'].replace("%20", " "), height=Mm(10))
                                 if 'text' in option and option['text'] != None:
                                     cell_1.text = cell_1.text + ("\n" if cell_1.text != "" else "") + option['text']
+                if question['question_type'] == "calculated_question":
+                    if config.calculated_display_var_set_in_text:
+                        doc.add_paragraph(config.blanks_replace_str * config.blanks_answer_n)
+                    else:
+                        for index, answer in enumerate(question['answer']):
+                            if answer['display'] and 'text' in answer and answer['text'] != None:
+                                html_parser.add_html_to_document("<p>" + str(index+1) + ". " + answer['text'] + ": " + config.blanks_replace_str * 20 + "</p>", doc)
                 else:
                     for index, answer in enumerate(question['answer']):
-                        if answer['display']:
+                        if answer['display']:                            
                             if 'image' in answer:
                                 for img in answer['image']:
                                     html_parser.add_html_to_document("<p>" + str(index+1) + ".</p>", doc)

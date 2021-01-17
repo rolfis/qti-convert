@@ -19,3 +19,6 @@ blanks_answer_n = 80
 # Random shuffle of answers in type "Matching Question"
 matching_random_shuffle_answers = True
 matching_random_shuffle_answer_options = True
+
+# If True, replace first set of variables in question text instead of displaying options
+calculated_display_var_set_in_text = False
