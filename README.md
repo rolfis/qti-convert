@@ -10,8 +10,6 @@ Note: This code has only been tested with Canvas export packages. They need to b
 
 ## Examples
 
-These are basic examples on how this code can be used.
-
 
     main.py imsmanifest.xml
 
