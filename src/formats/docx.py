@@ -58,7 +58,7 @@ def write_file(data, outfile):
                                         cell_1.add_picture(img['href'].replace("%20", " "), height=Mm(10))
                                 if 'text' in option and option['text'] != None:
                                     cell_1.text = cell_1.text + ("\n" if cell_1.text != "" else "") + option['text']
-                if question['question_type'] == "calculated_question":
+                elif question['question_type'] == "calculated_question":
                     if config.calculated_display_var_set_in_text:
                         doc.add_paragraph(config.blanks_replace_str * config.blanks_answer_n)
                     else:
