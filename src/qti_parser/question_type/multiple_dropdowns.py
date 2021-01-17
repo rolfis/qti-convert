@@ -45,8 +45,8 @@ def enumerate_blanks(text):
     start = 0
     counter = 1
     newstring = ""
-    blank = config.blanks_replace_str * config.blanks_question_n
-    for m in re.finditer(r"(" + blank + ")", text):
+    blank_regex = r"(" + config.blanks_replace_str * config.blanks_question_n + ")"
+    for m in re.finditer(blank_regex, text):
         end, newstart = m.span()
         newstring += text[start:end]
         rep = m.group(1).upper() + " <sup>" + str(counter) + "</sup>"
