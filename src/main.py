@@ -4,19 +4,23 @@ QTI to other formats converter
 """
 
 import argparse
+import hashlib
 import json
 import re
-import hashlib
+from pathlib import Path
+
 from logzero import logger
 from lxml import etree
-from qti_parser import assessment_meta, item
+
 import config
 import formats
+from qti_parser import assessment_meta, item
 
 __author__ = config.__author__
 __description__ = config.__description__
 __license__ = config.__license__
 __version__ = config.__version__
+
 
 def main(args):
     logger.info(__description__)
@@ -29,16 +33,24 @@ def main(args):
         } 
 
         for xml_resource in xml_doc.getroot().findall(".//{http://www.imsglobal.org/xsd/imsccv1p1/imscp_v1p1}resource[@type='imsqti_xmlv1p2']"):
+            # allow fully pathed input files using pathlib's Path objects
+            input_path = Path(args.input)
+            metadata_path = (input_path.parent / xml_resource.get("identifier") / "assessment_meta.xml")
+
             this_assessment = {
                 'id': xml_resource.get("identifier"),
-                'metadata': assessment_meta.get_metadata(xml_resource.get("identifier") + "/" + "assessment_meta.xml"),
+                'metadata': assessment_meta.get_metadata(metadata_path),
                 'question': []
             }
 
-            # TODO: Should be prefixed with PATH part of input filename since paths in XML are relative
-            this_assessment_xml = this_assessment['id'] + "/" + this_assessment['id'] + ".xml"
+            this_assessment_xml = (input_path.parent / this_assessment['id'] / (this_assessment['id'] + ".xml"))
+            logger.info(f"this assessment: {this_assessment_xml}")
 
-            for xml_item in etree.parse(this_assessment_xml).getroot().findall(".//{http://www.imsglobal.org/xsd/ims_qtiasiv1p2}item"):
+            for xml_item in (
+                etree.parse(str(this_assessment_xml))
+                .getroot()
+                .findall(".//{http://www.imsglobal.org/xsd/ims_qtiasiv1p2}item")
+            ):
                 this_assessment['question'].append(item.get_question(xml_item))
 
             qti_resource['assessment'].append(this_assessment)

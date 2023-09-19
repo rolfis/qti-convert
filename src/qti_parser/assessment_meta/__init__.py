@@ -5,12 +5,13 @@ Assesment Metadata
 from lxml import etree
 from logzero import logger
 
-def get_metadata(file):
+
+def get_metadata(file_path):
     """ Extracts basic metadata """
     metadata = {}
 
     try:
-        xml = etree.parse(file).getroot()
+        xml = etree.parse(str(file_path)).getroot()
         metadata = {
             'title': xml.find("./{http://canvas.instructure.com/xsd/cccv1p0}title").text,
             'description': xml.find("./{http://canvas.instructure.com/xsd/cccv1p0}description").text,
