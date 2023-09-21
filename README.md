@@ -5,7 +5,9 @@ This Python code is provided as-is and enhancements are welcome. The goal is to 
 
 Uses pipenv for package dependencies. Install pipenv with `pip install pipenv` then run `pipenv install` to install needed packages in virtual environment.
 
-Note: This code has only been tested with Canvas export packages. They need to be unzipped first. All paths are relative, so `cd` to the export directory first, then run main.py to get all paths correct. This will eventually be fixed in the future.
+Note: This code has only been tested with Canvas export packages. They need to be unzipped first.
+
+Specify the input file using either a relative or absolute path. Ensure the path is correctly set based on your current working directory.
 
 
 ## Examples

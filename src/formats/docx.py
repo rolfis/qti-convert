@@ -19,7 +19,12 @@ def write_file(data, outfile):
 
     for assessment in data['assessment']:
         doc.add_heading(assessment['metadata']['title'], 0)
-        html_parser.add_html_to_document(assessment['metadata']['description'], doc)
+
+        # handle error from missing description
+        description = assessment['metadata'].get('description') or ''
+        logger.info("Writing assessment: " + assessment['metadata']['title'])
+        logger.info("with description: " + description)
+        html_parser.add_html_to_document(description, doc)
 
         for question in assessment['question']:
             if 'title' in question:
