@@ -2,7 +2,7 @@
 __author__ = "Rolf Johansson"
 __description__ = "QTI converter utility"
 __license__ = "Apache License 2.0"
-__version__ = "1.0"
+__version__ = "1.0.1"
 
 # String in img href to remove from XML
 img_href_ims_base = "%24IMS-CC-FILEBASE%24/"
