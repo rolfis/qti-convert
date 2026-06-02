@@ -56,14 +56,10 @@ def main(args):
             qti_resource['assessment'].append(this_assessment)
 
         if args.format.lower() == "json":
-            if args.output:
-                logger.info("Writing JSON to '" + args.output + "'...")
-                with open(args.output, 'w') as outfile:
-                    json.dump(qti_resource, outfile)
-            else:
-                logger.info("Writing JSON to STDOUT...")
-                qti_resource_json = json.dumps(qti_resource, indent = 2)
-                print(qti_resource_json)
+            outfile = args.output or "output.json"
+            logger.info("Writing JSON to '" + outfile + "'...")
+            with open(outfile, 'w') as f:
+                json.dump(qti_resource, f, indent=2)
 
         elif args.format.lower() == "docx":
             if args.output:
@@ -72,6 +68,15 @@ def main(args):
                 outfile = "output.docx"
             logger.info("Writing DOCX to '" + outfile + "'...")
             formats.docx.write_file(qti_resource, outfile)
+
+        elif args.format.lower() == "gradescope":
+            if args.output and args.output.lower().endswith(".docx"):
+                logger.info("Writing Gradescope DOCX to '" + args.output + "'...")
+                formats.gradescope.write_docx(qti_resource, args.output)
+            else:
+                outfile = args.output or "output.txt"
+                logger.info("Writing Gradescope format to '" + outfile + "'...")
+                formats.gradescope.write_file(qti_resource, outfile)
 
         elif args.format.lower() == "pdf":
             logger.error("Format not supported yet: " + args.format)
@@ -90,7 +95,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Convert QTI files into other formats.", add_help=False)
     parser.add_argument("input", help="QTI input file (imsmanifest.xml).")
     parser.add_argument("-v", action="count", default=0, help="Verbosity (-v, -vv, etc).")
-    parser.add_argument("-f", action="store", dest="format", default="json", help="Output format, defaults to JSON.")
+    parser.add_argument("-f", action="store", dest="format", default="json", help="Output format: json, docx, gradescope. Defaults to JSON.")
     parser.add_argument("-o", action="store", dest="output", help="Output file.")
     parser.add_argument( "--version", action="version", help="Display version and exit.", version="%(prog)s (version {version})".format(version=__version__))
     parser.add_argument('-h', '--help', action='help', default=argparse.SUPPRESS, help='Show this help message and exit.')
